@@ -1,0 +1,832 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>IsmaCode IC</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* ── RESET MÓVIL ───────────────────────────────────────────── */
+    * { -webkit-tap-highlight-color: transparent; }
+    html, body { height: 100%; overflow: hidden; }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 18% 8%, rgba(207,0,80,.32), transparent 34%),
+        radial-gradient(circle at 78% 15%, rgba(255,77,146,.16), transparent 28%),
+        linear-gradient(135deg,#050507 0%,#151018 48%,#07070a 100%);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+    }
+
+    /* ── LAYOUT PRINCIPAL ──────────────────────────────────────── */
+    #app {
+      display: flex;
+      flex-direction: column;
+      height: 100dvh;
+      height: 100vh;
+    }
+
+    /* ── CABECERA ──────────────────────────────────────────────── */
+    #topbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: linear-gradient(90deg, rgba(207,0,80,.22), rgba(255,255,255,.02));
+      border-bottom: 1px solid var(--line);
+      flex-shrink: 0;
+    }
+    #topbar h1 {
+      font-size: 18px;
+      margin: 0;
+      flex: 1;
+    }
+    #topbar .badge {
+      font-size: 11px;
+      color: var(--accent-2);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+
+    /* ── PESTAÑAS ──────────────────────────────────────────────── */
+    #tabs {
+      display: flex;
+      border-bottom: 1px solid var(--line);
+      background: var(--panel);
+      flex-shrink: 0;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 10px 4px;
+      border: none;
+      border-bottom: 2px solid transparent;
+      background: transparent;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      cursor: pointer;
+      border-radius: 0;
+    }
+    .tab-btn.active {
+      color: var(--accent-2);
+      border-bottom-color: var(--accent-2);
+    }
+
+    /* ── PANELES DE CONTENIDO ──────────────────────────────────── */
+    .tab-panel { display: none; flex: 1; flex-direction: column; min-height: 0; overflow: hidden; }
+    .tab-panel.active { display: flex; }
+
+    /* ── TOOLBAR DE ACCIONES ───────────────────────────────────── */
+    #toolbar {
+      display: flex;
+      gap: 6px;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(20,18,25,.9);
+      flex-wrap: wrap;
+      flex-shrink: 0;
+    }
+    #toolbar button {
+      flex: 1;
+      min-width: 60px;
+      padding: 9px 6px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #241b25;
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    #toolbar button.primary {
+      background: var(--accent);
+      border-color: #ff2f83;
+      box-shadow: 0 4px 18px rgba(207,0,80,.3);
+    }
+    #toolbar button:active { opacity: .75; }
+
+    /* ── ESTADO ────────────────────────────────────────────────── */
+    #statusbar {
+      padding: 5px 14px;
+      font-size: 12px;
+      color: var(--muted);
+      background: rgba(10,9,12,.8);
+      border-bottom: 1px solid var(--line);
+      flex-shrink: 0;
+    }
+    #statusbar.ok  { color: #7dffbd; }
+    #statusbar.bad { color: var(--danger); }
+
+    /* ── EDITOR ────────────────────────────────────────────────── */
+    #editor-wrap {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+      background: #090a0f;
+    }
+    #gutter {
+      padding: 14px 8px 14px 4px;
+      border-right: 1px solid var(--line);
+      color: #806776;
+      text-align: right;
+      font: 14px/1.65 "Cascadia Mono", Consolas, monospace;
+      white-space: pre;
+      user-select: none;
+      overflow: hidden;
+      min-width: 34px;
+      flex-shrink: 0;
+    }
+    #code {
+      flex: 1;
+      padding: 14px 12px;
+      border: none;
+      outline: none;
+      resize: none;
+      background: transparent;
+      color: #fff7fb;
+      font: 14px/1.65 "Cascadia Mono", Consolas, monospace;
+      tab-size: 2;
+      -webkit-text-size-adjust: none;
+      text-size-adjust: none;
+    }
+
+    /* ── SALIDA ────────────────────────────────────────────────── */
+    #output-panel {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      background: #07080c;
+    }
+    #output-head {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    #output-head h2 { font-size: 14px; margin: 0; }
+    #output-clear {
+      font-size: 11px;
+      padding: 5px 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #241b25;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    #output {
+      flex: 1;
+      margin: 0;
+      padding: 14px;
+      overflow: auto;
+      white-space: pre-wrap;
+      color: #f1e5eb;
+      font: 13px/1.55 "Cascadia Mono", Consolas, monospace;
+    }
+
+    /* ── CANVAS ────────────────────────────────────────────────── */
+    #canvas-panel {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      background: #0a080d;
+    }
+    #canvas-head {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+    #canvas-head h2 { font-size: 14px; margin: 0; }
+    #canvas-head span { font-size: 11px; color: var(--muted); }
+    #canvas-wrap {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px;
+      overflow: auto;
+    }
+    #stage {
+      max-width: 100%;
+      max-height: 100%;
+      background: #07080c;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      touch-action: none;
+    }
+
+    /* ── EJEMPLOS ──────────────────────────────────────────────── */
+    #examples-panel {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 12px;
+    }
+    .ex-card {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--panel-2);
+      color: var(--text);
+      text-align: left;
+      padding: 12px 14px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      display: block;
+    }
+    .ex-card strong { display: block; font-size: 14px; margin-bottom: 3px; }
+    .ex-card span   { color: var(--muted); font-size: 12px; }
+    .ex-card:active { border-color: var(--accent-2); }
+
+    /* ── ARCHIVOS ──────────────────────────────────────────────── */
+    #files-panel {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .file-action {
+      width: 100%;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--panel-2);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 700;
+      text-align: left;
+      cursor: pointer;
+    }
+    .file-action .file-desc { display: block; font-size: 12px; color: var(--muted); font-weight: 400; margin-top: 3px; }
+    .file-action:active { border-color: var(--accent-2); }
+    .file-action.primary { border-color: #ff2f83; background: rgba(207,0,80,.15); }
+    #savedFiles { margin-top: 6px; }
+    #savedFiles h3 { font-size: 13px; color: var(--muted); margin: 0 0 8px; }
+    .saved-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #1a1520;
+      margin-bottom: 7px;
+      cursor: pointer;
+    }
+    .saved-item span { flex: 1; font-size: 13px; }
+    .saved-item .del { color: var(--danger); font-size: 12px; padding: 4px 8px; background: transparent; border: none; cursor: pointer; }
+    .saved-item:active { border-color: var(--accent-2); }
+
+    /* ── AUTOCOMPLETE ──────────────────────────────────────────── */
+    #autocomplete {
+      position: fixed;
+      background: #1e1625;
+      border: 1px solid var(--accent-2);
+      border-radius: 8px;
+      z-index: 1000;
+      max-height: 180px;
+      overflow-y: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,.6);
+      display: none;
+      min-width: 160px;
+    }
+    .ac-item {
+      padding: 10px 14px;
+      font: 13px "Cascadia Mono", monospace;
+      color: var(--text);
+      cursor: pointer;
+      border-bottom: 1px solid rgba(58,41,52,.5);
+    }
+    .ac-item:last-child { border-bottom: none; }
+    .ac-item.selected, .ac-item:active { background: rgba(207,0,80,.3); color: white; }
+    .ac-item .ac-type { font-size: 10px; color: var(--accent-2); margin-left: 6px; }
+
+    /* ── INPUT NATIVO OCULTO ───────────────────────────────────── */
+    #fileInput { display: none; }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- CABECERA -->
+  <div id="topbar">
+    <div style="flex:1">
+      <div class="badge">Lenguaje IC</div>
+      <h1>IsmaCode</h1>
+    </div>
+    <button id="runBtn" style="background:var(--accent);border:1px solid #ff2f83;border-radius:8px;color:white;padding:10px 18px;font-weight:800;font-size:13px;box-shadow:0 4px 18px rgba(207,0,80,.35)">▶ Ejecutar</button>
+  </div>
+
+  <!-- PESTAÑAS -->
+  <div id="tabs">
+    <button class="tab-btn active" data-tab="editor">✏️ Editor</button>
+    <button class="tab-btn" data-tab="output">📋 Salida</button>
+    <button class="tab-btn" data-tab="canvas">🎮 Canvas</button>
+    <button class="tab-btn" data-tab="examples">⭐ Ejemplos</button>
+    <button class="tab-btn" data-tab="files">📁 Archivos</button>
+  </div>
+
+  <!-- BARRA DE ESTADO -->
+  <div id="statusbar">Listo</div>
+
+  <!-- ══ PANEL: EDITOR ══ -->
+  <div class="tab-panel active" id="panel-editor">
+    <div id="toolbar">
+      <button class="primary" id="runBtn2">▶ Ejecutar</button>
+      <button id="clearOutBtn">🗑 Limpiar</button>
+      <button id="copyBtn">📋 Copiar</button>
+    </div>
+    <div id="editor-wrap">
+      <div id="gutter">1</div>
+      <textarea id="code" spellcheck="false" autocorrect="off" autocapitalize="none" autocomplete="off" placeholder="Escribe tu código IsmaCode aquí..."></textarea>
+    </div>
+    <div id="autocomplete"></div>
+  </div>
+
+  <!-- ══ PANEL: SALIDA ══ -->
+  <div class="tab-panel" id="panel-output">
+    <div id="output-panel">
+      <div id="output-head">
+        <h2>Consola de salida</h2>
+        <button id="output-clear">Limpiar</button>
+      </div>
+      <pre id="output">Ejecuta tu código para ver la salida aquí.</pre>
+    </div>
+  </div>
+
+  <!-- ══ PANEL: CANVAS ══ -->
+  <div class="tab-panel" id="panel-canvas">
+    <div id="canvas-panel">
+      <div id="canvas-head">
+        <h2>Pantalla de juego</h2>
+        <span>Teclado · Colisiones · Dibujo</span>
+      </div>
+      <div id="canvas-wrap">
+        <canvas id="stage" width="640" height="360" tabindex="0"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ PANEL: EJEMPLOS ══ -->
+  <div class="tab-panel" id="panel-examples">
+    <div id="examples-panel">
+      <div id="examplesList"></div>
+    </div>
+  </div>
+
+  <!-- ══ PANEL: ARCHIVOS ══ -->
+  <div class="tab-panel" id="panel-files">
+    <div id="files-panel">
+      <button class="file-action primary" id="saveFileBtn">
+        💾 Guardar archivo .ic
+        <span class="file-desc">Guarda el código actual con un nombre</span>
+      </button>
+      <button class="file-action" id="openFileBtn">
+        📂 Abrir archivo .ic
+        <span class="file-desc">Abre un archivo desde el dispositivo</span>
+      </button>
+      <button class="file-action" id="exportBtn">
+        📤 Exportar código
+        <span class="file-desc">Comparte el código como texto</span>
+      </button>
+      <div id="savedFiles">
+        <h3>Archivos guardados</h3>
+        <div id="savedList"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Input oculto para abrir archivos -->
+<input type="file" id="fileInput" accept=".ic,text/plain">
+
+<script src="ismacode-core.js"></script>
+<script src="app.js"></script>
+<script>
+// ══════════════════════════════════════════════════════════════════
+// IsmaCode Mobile — Capa de interfaz adaptada para Android WebView
+// ══════════════════════════════════════════════════════════════════
+
+const codeEl     = document.getElementById("code");
+const outputEl   = document.getElementById("output");
+const statusEl   = document.getElementById("statusbar");
+const gutterEl   = document.getElementById("gutter");
+const stageEl    = document.getElementById("stage");
+const ctx        = stageEl.getContext("2d");
+const acEl       = document.getElementById("autocomplete");
+
+// ── Estado del canvas / input ──────────────────────────────────
+let currentColor     = "#ff4d92";
+let currentFont      = "Inter, system-ui, sans-serif";
+let currentLineWidth = 4;
+let currentAlpha     = 1;
+let cameraX = 0, cameraY = 0;
+const inputState = {
+  keys:  new Set(),
+  newKeys: new Set(),
+  mouse: { x: 0, y: 0, down: false, clicked: false, right: false },
+  screen:{ width: 640, height: 360 }
+};
+const imageCache = new Map();
+
+// ── Autocompletado ─────────────────────────────────────────────
+const IC_KEYWORDS = [
+  "mostrar","muestra","imprimir","decir","escribir","ponme","dimelo","muestrame",
+  "guardar","crear","poner","definir","recordar","establecer","fijar","asignar",
+  "es","vale","si","sino","según","segun","caso","por defecto",
+  "repetir","veces","mientras","para cada","por cada","para cada con indice",
+  "funcion","función","comando","receta","procedimiento","tarea",
+  "devolver","regresar","retornar","da","regresa",
+  "clase","tipo","plantilla","nuevo","nueva",
+  "sumar","restar","multiplicar","dividir","aumentar","reducir","incrementar",
+  "agregar","añadir","meter","quitar","sacar","eliminar","insertar",
+  "intentar","probar","si falla","si peta","lanzar error",
+  "parar","romper","basta","continuar","siguiente",
+  "fin","ok","venga",
+  "pantalla","fondo","color","rectangulo","rect_redondeado","circulo",
+  "linea","triangulo","poligono","estrella","arco","curva","marco",
+  "barra","sprite","texto_en","imagen","degradado","sombra","opacidad",
+  "fuente","grosor_linea","camara","limpiar pantalla",
+  "guardar_canvas","restaurar_canvas",
+  "tecla","tecla_nueva","raton_x","raton_y","raton_pulsado","raton_clic",
+  "raton_derecho","fotograma","ancho_pantalla","alto_pantalla",
+  "choca","choca_circulos","distancia","limitar","mover_hacia",
+  "angulo","oscila","aplicar_gravedad","rebotar","friccion",
+  "largo","vacio","elegir","ordenar","ordenar_numeros","mezclar","invertir",
+  "unico","primero","ultimo","suma","promedio","mediana","indice",
+  "filtrar","mapear","reducir","agrupar_por","zip","tomar","saltar",
+  "rango","azar","azar_decimal","redondear","piso","techo","absoluto",
+  "raiz","potencia","sen","cos","tan","numero","entero","decimal",
+  "texto","mayusculas","minusculas","titulo","recortar","reemplazar",
+  "contiene","empieza","termina","separar","unir","repetir_texto",
+  "fecha","hora","fecha_hora","ahora","esperar",
+  "guardar_datos","cargar_datos","borrar_datos",
+  "tipo","existe","es_numero","es_texto","es_lista","depurar","tabla",
+  "nota","preguntar","pedir","dame"
+];
+
+let acVisible = false, acItems = [], acSelected = 0;
+
+function getWordBefore(el) {
+  const pos = el.selectionStart;
+  const text = el.value.substring(0, pos);
+  const m = text.match(/[\wáéíóúüñÁÉÍÓÚÜÑ_]+$/);
+  return m ? m[0] : "";
+}
+
+function showAutocomplete() {
+  const word = getWordBefore(codeEl).toLowerCase();
+  if (word.length < 2) { hideAutocomplete(); return; }
+  acItems = IC_KEYWORDS.filter(k => k.toLowerCase().startsWith(word) && k !== word).slice(0, 8);
+  if (!acItems.length) { hideAutocomplete(); return; }
+
+  acEl.innerHTML = acItems.map((item, i) =>
+    `<div class="ac-item${i===0?' selected':''}" data-idx="${i}">${item}</div>`
+  ).join("");
+  acSelected = 0;
+
+  // Posicionar bajo el cursor
+  const pos = codeEl.selectionStart;
+  const before = codeEl.value.substring(0, pos);
+  const lines  = before.split("\n");
+  const line   = lines.length;
+  const lineH  = 14 * 1.65;
+  const editorRect = document.getElementById("editor-wrap").getBoundingClientRect();
+  const top = editorRect.top + (line * lineH) - codeEl.scrollTop + 4;
+  const left = editorRect.left + 34 + 14;
+  acEl.style.top  = Math.min(top, window.innerHeight - 200) + "px";
+  acEl.style.left = left + "px";
+  acEl.style.display = "block";
+  acVisible = true;
+}
+
+function hideAutocomplete() {
+  acEl.style.display = "none";
+  acVisible = false;
+  acItems = [];
+}
+
+function applyAutocomplete(idx) {
+  const word = getWordBefore(codeEl);
+  const replacement = acItems[idx];
+  const pos = codeEl.selectionStart;
+  const before = codeEl.value.substring(0, pos - word.length);
+  const after  = codeEl.value.substring(pos);
+  codeEl.value = before + replacement + after;
+  codeEl.selectionStart = codeEl.selectionEnd = before.length + replacement.length;
+  hideAutocomplete();
+  updateGutter();
+}
+
+acEl.addEventListener("click", e => {
+  const item = e.target.closest(".ac-item");
+  if (item) applyAutocomplete(Number(item.dataset.idx));
+});
+
+// ── Utilidades de UI ───────────────────────────────────────────
+function setStatus(text, cls = "") {
+  statusEl.textContent = text;
+  statusEl.className   = cls;
+}
+
+function write(text = "") {
+  outputEl.textContent += String(text) + "\n";
+}
+
+function updateGutter() {
+  const n = codeEl.value.split("\n").length;
+  gutterEl.textContent = Array.from({length: n}, (_, i) => i + 1).join("\n");
+}
+
+function resizeCanvas(w, h) {
+  stageEl.width  = Number(w) || 640;
+  stageEl.height = Number(h) || 360;
+  inputState.screen.width  = stageEl.width;
+  inputState.screen.height = stageEl.height;
+  ctx.fillStyle = "#07080c";
+  ctx.fillRect(0, 0, stageEl.width, stageEl.height);
+}
+
+function sx(v) { return Number(v) - cameraX; }
+function sy(v) { return Number(v) - cameraY; }
+
+// ── Sistema de dibujo (igual que el original) ──────────────────
+function draw(type, data) {
+  if (type==="screen")      { resizeCanvas(data.width,data.height); return; }
+  if (type==="clearScreen") { cameraX=0;cameraY=0;inputState.mouse.clicked=false;ctx.clearRect(0,0,stageEl.width,stageEl.height); return; }
+  if (type==="camera")      { cameraX=Number(data.x)||0;cameraY=Number(data.y)||0; return; }
+  if (type==="background")  { ctx.save();ctx.globalAlpha=1;ctx.fillStyle=data.color;ctx.fillRect(0,0,stageEl.width,stageEl.height);ctx.restore(); return; }
+  if (type==="color")       { currentColor=data.color; return; }
+  if (type==="opacity")     { currentAlpha=Math.max(0,Math.min(1,Number(data.alpha)));ctx.globalAlpha=currentAlpha; return; }
+  if (type==="lineWidth")   { currentLineWidth=Number(data.width)||2; return; }
+  if (type==="font")        { currentFont=`${data.family||"Inter, system-ui, sans-serif"}`; return; }
+  if (type==="textAlign")   { ctx.textAlign=data.align||"start"; return; }
+  if (type==="save")        { ctx.save(); return; }
+  if (type==="restore")     { ctx.restore(); return; }
+  if (type==="shadow")      { ctx.shadowColor=data.color||"transparent";ctx.shadowBlur=Number(data.blur)||0;ctx.shadowOffsetX=Number(data.ox)||0;ctx.shadowOffsetY=Number(data.oy)||0; return; }
+  if (type==="rotate")      { ctx.save();const cx=sx(data.cx||0),cy=sy(data.cy||0);ctx.translate(cx,cy);ctx.rotate(Number(data.angle));ctx.translate(-cx,-cy); return; }
+  if (type==="scale")       { ctx.save();ctx.scale(Number(data.sx)||1,Number(data.sy)||1); return; }
+  if (type==="rect")        { ctx.fillStyle=currentColor;ctx.fillRect(sx(data.x),sy(data.y),Number(data.width),Number(data.height)); return; }
+  if (type==="roundRect")   { const x=sx(data.x),y=sy(data.y),w=Number(data.width),h=Number(data.height),r=Number(data.radius)||0;ctx.fillStyle=currentColor;ctx.beginPath();ctx.roundRect?ctx.roundRect(x,y,w,h,r):ctx.rect(x,y,w,h);ctx.fill(); return; }
+  if (type==="circle")      { ctx.fillStyle=currentColor;ctx.beginPath();ctx.arc(sx(data.x),sy(data.y),Number(data.radius),0,Math.PI*2);ctx.fill(); return; }
+  if (type==="arc")         { ctx.strokeStyle=currentColor;ctx.lineWidth=currentLineWidth;ctx.beginPath();ctx.arc(sx(data.x),sy(data.y),Number(data.radius),Number(data.start),Number(data.end));data.fill?(ctx.fillStyle=currentColor,ctx.fill()):ctx.stroke(); return; }
+  if (type==="line")        { ctx.strokeStyle=currentColor;ctx.lineWidth=currentLineWidth;ctx.beginPath();ctx.moveTo(sx(data.x1),sy(data.y1));ctx.lineTo(sx(data.x2),sy(data.y2));ctx.stroke(); return; }
+  if (type==="bezier")      { ctx.strokeStyle=currentColor;ctx.lineWidth=currentLineWidth;ctx.beginPath();ctx.moveTo(sx(data.x1),sy(data.y1));ctx.bezierCurveTo(sx(data.cx1),sy(data.cy1),sx(data.cx2),sy(data.cy2),sx(data.x2),sy(data.y2));ctx.stroke(); return; }
+  if (type==="text")        { ctx.fillStyle=currentColor;ctx.font=`${Number(data.size)||20}px ${currentFont}`;ctx.fillText(String(data.text),sx(data.x),sy(data.y)); return; }
+  if (type==="triangle")    { ctx.fillStyle=currentColor;ctx.beginPath();ctx.moveTo(sx(data.x1),sy(data.y1));ctx.lineTo(sx(data.x2),sy(data.y2));ctx.lineTo(sx(data.x3),sy(data.y3));ctx.closePath();ctx.fill(); return; }
+  if (type==="polygon")     { const sides=Number(data.sides)||6,r=Number(data.radius),cx2=sx(data.x),cy2=sy(data.y);ctx.fillStyle=currentColor;ctx.beginPath();for(let i=0;i<sides;i++){const a=(i/sides)*Math.PI*2-Math.PI/2;i===0?ctx.moveTo(cx2+r*Math.cos(a),cy2+r*Math.sin(a)):ctx.lineTo(cx2+r*Math.cos(a),cy2+r*Math.sin(a));}ctx.closePath();ctx.fill(); return; }
+  if (type==="star")        { const pts=Number(data.points)||5,ro=Number(data.outerRadius),ri=Number(data.innerRadius),cx2=sx(data.x),cy2=sy(data.y);ctx.fillStyle=currentColor;ctx.beginPath();for(let i=0;i<pts*2;i++){const a=(i/(pts*2))*Math.PI*2-Math.PI/2;const rad=i%2===0?ro:ri;i===0?ctx.moveTo(cx2+rad*Math.cos(a),cy2+rad*Math.sin(a)):ctx.lineTo(cx2+rad*Math.cos(a),cy2+rad*Math.sin(a));}ctx.closePath();ctx.fill(); return; }
+  if (type==="strokeRect")  { ctx.strokeStyle=currentColor;ctx.lineWidth=currentLineWidth;ctx.strokeRect(sx(data.x),sy(data.y),Number(data.width),Number(data.height)); return; }
+  if (type==="gradient")    { const g=ctx.createLinearGradient(sx(data.x1),sy(data.y1),sx(data.x2),sy(data.y2));g.addColorStop(0,data.color1);g.addColorStop(1,data.color2);currentColor=g; return; }
+  if (type==="bar")         { const x=sx(data.x),y=sy(data.y),width=Number(data.width),height=Number(data.height),max=Number(data.max)||100,value=Math.max(0,Math.min(max,Number(data.value)));ctx.fillStyle="rgba(255,255,255,.18)";ctx.fillRect(x,y,width,height);ctx.fillStyle=currentColor;ctx.fillRect(x,y,width*(value/max),height);ctx.strokeStyle="rgba(255,255,255,.7)";ctx.lineWidth=2;ctx.strokeRect(x,y,width,height); return; }
+  if (type==="sprite")      { const x=sx(data.x),y=sy(data.y),width=Number(data.width),height=Number(data.height);ctx.fillStyle=currentColor;ctx.fillRect(x,y,width,height);ctx.fillStyle="white";ctx.font=`${Math.max(12,Math.min(width,height)*0.35)}px ${currentFont}`;ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(String(data.name),x+width/2,y+height/2);ctx.textAlign="start";ctx.textBaseline="alphabetic"; return; }
+  if (type==="image")       { const src=String(data.src);const doRender=(img)=>{const x=sx(data.x),y=sy(data.y),w=data.width?Number(data.width):img.naturalWidth,h=data.height?Number(data.height):img.naturalHeight;ctx.drawImage(img,x,y,w,h);};if(imageCache.has(src)){doRender(imageCache.get(src));}else{const img=new Image();img.crossOrigin="anonymous";img.onload=()=>{imageCache.set(src,img);doRender(img);};img.src=src;} return; }
+}
+
+// ── Ejecutar ───────────────────────────────────────────────────
+async function runCode() {
+  outputEl.textContent = "";
+  resizeCanvas(stageEl.width, stageEl.height);
+  currentColor="#ff4d92"; currentFont="Inter, system-ui, sans-serif";
+  currentLineWidth=4; currentAlpha=1;
+  ctx.globalAlpha=1; ctx.shadowColor="transparent"; ctx.shadowBlur=0;
+  ctx.textAlign="start"; ctx.textBaseline="alphabetic";
+  cameraX=0; cameraY=0; imageCache.clear();
+  setStatus("Ejecutando...");
+  document.getElementById("runBtn").disabled = true;
+  document.getElementById("runBtn2").disabled = true;
+  // Cambiar a canvas si hay comandos de pantalla
+  const hasCanvas = /pantalla|rectangulo|circulo|linea|fondo|sprite|fotograma/i.test(codeEl.value);
+  if (hasCanvas) switchTab("canvas");
+  else switchTab("output");
+  try {
+    await IsmaCodeCore.run(codeEl.value, {
+      write,
+      clear: () => { outputEl.textContent = ""; },
+      ask:   q => prompt(q) ?? "",
+      draw,
+      input: inputState
+    });
+    setStatus("Terminado", "ok");
+  } catch(err) {
+    write(err.isIsmaCode ? err.message : `Algo falló: ${err.message}`);
+    setStatus("Error — revisa la salida", "bad");
+    switchTab("output");
+  } finally {
+    document.getElementById("runBtn").disabled = false;
+    document.getElementById("runBtn2").disabled = false;
+  }
+}
+
+// ── Pestañas ───────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === name));
+  document.querySelectorAll(".tab-panel").forEach(p => p.classList.toggle("active", p.id === "panel-" + name));
+}
+document.getElementById("tabs").addEventListener("click", e => {
+  const btn = e.target.closest(".tab-btn");
+  if (btn) switchTab(btn.dataset.tab);
+});
+
+// ── Editor ─────────────────────────────────────────────────────
+codeEl.addEventListener("input", () => { updateGutter(); showAutocomplete(); });
+codeEl.addEventListener("keydown", e => {
+  hideAutocomplete();
+  if (e.key === "Tab") {
+    e.preventDefault();
+    const s = codeEl.selectionStart, en = codeEl.selectionEnd;
+    codeEl.value = codeEl.value.slice(0,s) + "  " + codeEl.value.slice(en);
+    codeEl.selectionStart = codeEl.selectionEnd = s + 2;
+    updateGutter();
+  }
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") runCode();
+});
+codeEl.addEventListener("scroll", () => {
+  gutterEl.scrollTop = codeEl.scrollTop;
+});
+
+// ── Botones ────────────────────────────────────────────────────
+document.getElementById("runBtn").addEventListener("click", runCode);
+document.getElementById("runBtn2").addEventListener("click", runCode);
+document.getElementById("clearOutBtn").addEventListener("click", () => { outputEl.textContent = ""; setStatus("Salida limpia"); });
+document.getElementById("output-clear").addEventListener("click", () => { outputEl.textContent = ""; });
+document.getElementById("copyBtn").addEventListener("click", async () => {
+  try {
+    if (navigator.clipboard) await navigator.clipboard.writeText(codeEl.value);
+    else {
+      // Fallback para WebView Android
+      if (window.Android && window.Android.copyToClipboard) window.Android.copyToClipboard(codeEl.value);
+    }
+    setStatus("Código copiado", "ok");
+  } catch(e) { setStatus("Error al copiar"); }
+});
+
+// ── Archivos ───────────────────────────────────────────────────
+function getSavedFiles() {
+  try { return JSON.parse(localStorage.getItem("ic_files") || "{}"); } catch(e) { return {}; }
+}
+function renderSavedFiles() {
+  const files = getSavedFiles();
+  const list  = document.getElementById("savedList");
+  const keys  = Object.keys(files);
+  if (!keys.length) { list.innerHTML = '<p style="color:var(--muted);font-size:13px">Sin archivos guardados</p>'; return; }
+  list.innerHTML = keys.map(k =>
+    `<div class="saved-item" data-key="${k}">
+      <span>📄 ${k}</span>
+      <button class="del" data-del="${k}">✕</button>
+    </div>`
+  ).join("");
+  list.querySelectorAll(".saved-item").forEach(item => {
+    item.addEventListener("click", e => {
+      if (e.target.dataset.del) {
+        const f = getSavedFiles(); delete f[e.target.dataset.del];
+        localStorage.setItem("ic_files", JSON.stringify(f));
+        renderSavedFiles(); return;
+      }
+      const key = item.dataset.key;
+      codeEl.value = getSavedFiles()[key] || "";
+      updateGutter(); setStatus(`${key} cargado`, "ok");
+      switchTab("editor");
+    });
+  });
+}
+
+document.getElementById("saveFileBtn").addEventListener("click", () => {
+  const name = prompt("Nombre del archivo (sin .ic):") || "programa";
+  const files = getSavedFiles();
+  files[name + ".ic"] = codeEl.value;
+  localStorage.setItem("ic_files", JSON.stringify(files));
+  setStatus(`${name}.ic guardado`, "ok");
+  renderSavedFiles();
+  // También intentar guardar en Android nativo si está disponible
+  if (window.Android && window.Android.saveFile) window.Android.saveFile(name + ".ic", codeEl.value);
+});
+
+document.getElementById("openFileBtn").addEventListener("click", () => {
+  document.getElementById("fileInput").click();
+});
+document.getElementById("fileInput").addEventListener("change", async e => {
+  const file = e.target.files[0]; if (!file) return;
+  codeEl.value = await file.text();
+  updateGutter(); setStatus(`${file.name} abierto`, "ok");
+  switchTab("editor");
+});
+
+document.getElementById("exportBtn").addEventListener("click", () => {
+  const code = codeEl.value;
+  if (window.Android && window.Android.shareText) {
+    window.Android.shareText(code);
+  } else {
+    // Fallback web
+    const blob = new Blob([code], {type: "text/plain"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = "programa.ic"; a.click();
+    URL.revokeObjectURL(a.href);
+  }
+  setStatus("Exportado", "ok");
+});
+
+// ── Teclado físico / virtual ───────────────────────────────────
+window.addEventListener("keydown", e => {
+  const k = e.key.toLowerCase();
+  if (!inputState.keys.has(k)) inputState.newKeys.add(k);
+  inputState.keys.add(k);
+  if (["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "].includes(e.key)) e.preventDefault();
+});
+window.addEventListener("keyup", e => {
+  const k = e.key.toLowerCase();
+  inputState.keys.delete(k); inputState.newKeys.delete(k);
+});
+
+// ── Touch en canvas (simular teclas con D-pad táctil) ──────────
+stageEl.addEventListener("pointermove", e => {
+  const rect = stageEl.getBoundingClientRect();
+  inputState.mouse.x = (e.clientX - rect.left) * (stageEl.width  / rect.width);
+  inputState.mouse.y = (e.clientY - rect.top)  * (stageEl.height / rect.height);
+});
+stageEl.addEventListener("pointerdown", e => {
+  inputState.mouse.down = true; inputState.mouse.clicked = true;
+  inputState.mouse.right = e.button === 2;
+  stageEl.setPointerCapture(e.pointerId);
+});
+stageEl.addEventListener("pointerup", () => { inputState.mouse.down = false; inputState.mouse.right = false; });
+stageEl.addEventListener("contextmenu", e => e.preventDefault());
+
+// ── Ejemplos ───────────────────────────────────────────────────
+const EXAMPLES = [
+  { title:"Hola IC", hint:"Variables, textos y fechas",
+    code:`guardar nombre = "Ismael"\nmostrar "Hola " + nombre\nmostrar "Hoy es " + fecha()\nmostrar mayusculas("IsmaCode despierta")`},
+  { title:"Dibujo básico", hint:"Formas, colores y barra",
+    code:`pantalla 640, 360\nfondo "#130812"\ncolor "#cf0050"\nrectangulo 40, 60, 170, 110\ncolor "#ffffff"\ntexto_en "IC dibuja", 62, 120, 28\ncolor "#ff4d92"\ncirculo 430, 170, 70\nlinea 300, 300, 540, 70\nmarco 38, 58, 174, 114\nbarra 60, 290, 240, 24, 75, 100\ntriangulo 520, 270, 570, 320, 470, 320`},
+  { title:"Juego base", hint:"Interactivo con teclado",
+    code:`pantalla 640, 360\njugador_x es 80\njugador_y es 250\nvelocidad es 7\nvida es 100\npuntos es 0\nmonedas es []\n\nrepetir 6 veces\n  moneda es [azar(120, 570), azar(50, 260)]\n  agregar moneda a monedas\nfin\n\nrepetir 600 veces\n  limpiar pantalla\n  fondo "#0a0a0f"\n\n  si tecla("derecha") entonces\n    sumar jugador_x por velocidad\n  fin\n  si tecla("izquierda") entonces\n    restar jugador_x por velocidad\n  fin\n  si tecla("arriba") entonces\n    restar jugador_y por velocidad\n  fin\n  si tecla("abajo") entonces\n    sumar jugador_y por velocidad\n  fin\n\n  jugador_x es limitar(jugador_x, 0, ancho_pantalla() - 55)\n  jugador_y es limitar(jugador_y, 45, alto_pantalla() - 55)\n\n  color "#ffd166"\n  para cada moneda en monedas\n    circulo primero(moneda), ultimo(moneda), 12\n    si choca(jugador_x, jugador_y, 55, 55, primero(moneda) - 12, ultimo(moneda) - 12, 24, 24) entonces\n      sumar puntos por 1\n      quitar moneda de monedas\n    fin\n  fin\n\n  color "#ff4d92"\n  sprite "IC", jugador_x, jugador_y, 55, 55\n  marco jugador_x - 4, jugador_y - 4, 63, 63\n\n  color "#ffffff"\n  texto_en "Mueve con flechas", 28, 28, 22\n  texto_en "Puntos: " + puntos, 28, 56, 22\n  barra 28, 70, 180, 16, vida, 100\n  fotograma 60\nfin\n\nmostrar "Puntos conseguidos: " + puntos`},
+  { title:"Variables y condiciones", hint:"Si / sino si / sino",
+    code:`la nota es 7\n\nsi la nota >= 9 entonces\n  mostrar "Sobresaliente"\nsino si la nota >= 7\n  mostrar "Notable"\nsino si la nota >= 5\n  mostrar "Aprobado"\nsino\n  mostrar "Suspenso"\nfin`},
+  { title:"Listas e inventario", hint:"Agregar, quitar, recorrer",
+    code:`mochila es ["agua", "mapa"]\nagregar "linterna" a mochila\nagregar "llave" a mochila\nquitar "mapa" de mochila\n\npara cada objeto en mochila:\n  mostrar "Llevas: " + objeto\nfin\n\nmostrar "Total: " + largo(mochila)`},
+  { title:"Clases y objetos", hint:"Constructor y métodos",
+    code:`clase Jugador nombre vida:\n  funcion saludar:\n    mostrar "Soy " + nombre + " con " + vida + " de vida"\n  fin\n  funcion curar cantidad:\n    sumar vida por cantidad\n    mostrar nombre + " curado. Vida: " + vida\n  fin\nfin\n\nj1 es nuevo Jugador "Ismael" 80\nj1.saludar()\nj1.curar(15)\nmostrar "Vida final: " + j1.vida`},
+  { title:"Interpolación {vars}", hint:"Variables dentro de textos",
+    code:`nombre es "Ismael"\nedad es 17\nciudad es "Madrid"\n\nmostrar "Hola, soy {nombre} y tengo {edad} años"\nmostrar "Vivo en {ciudad} y nací en {2026 - edad}"`},
+  { title:"Pipe |>", hint:"Encadenar funciones",
+    code:`numeros es [5, 2, 8, 1, 9, 3, 7, 4, 6]\n\nresultado es numeros |> filtrar(n => n > 4) |> ordenar_numeros\nmostrar resultado`},
+  { title:"Manejo de errores", hint:"Intentar / si falla",
+    code:`intentar\n  un numero es numero("hola")\n  mostrar el numero + 5\nsi falla el problema\n  mostrar "Algo salio mal: " + el problema\nfin\n\nmostrar "El programa sigue aunque hubo un error"`},
+  { title:"Almacenamiento local", hint:"Guardar datos entre sesiones",
+    code:`guardar_datos("puntuacion", 850)\npuntos es cargar_datos("puntuacion", 0)\nmostrar "Récord: " + puntos\nborrar_datos("puntuacion")`}
+];
+
+function loadExamples() {
+  const list = document.getElementById("examplesList");
+  list.innerHTML = EXAMPLES.map((ex, i) =>
+    `<button class="ex-card" data-idx="${i}">
+      <strong>${ex.title}</strong>
+      <span>${ex.hint}</span>
+    </button>`
+  ).join("");
+  list.querySelectorAll(".ex-card").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const ex = EXAMPLES[Number(btn.dataset.idx)];
+      codeEl.value = ex.code;
+      updateGutter();
+      setStatus(`Ejemplo "${ex.title}" cargado`);
+      switchTab("editor");
+    });
+  });
+}
+
+// ── Init ───────────────────────────────────────────────────────
+resizeCanvas(640, 360);
+loadExamples();
+renderSavedFiles();
+codeEl.value = EXAMPLES[0].code;
+updateGutter();
+
+// Exponer función para que Android pueda llamar desde Kotlin
+window.IsmaCodeMobile = {
+  runCode,
+  getCode: () => codeEl.value,
+  setCode: (c) => { codeEl.value = c; updateGutter(); },
+  setStatus
+};
+</script>
+</body>
+</html>
