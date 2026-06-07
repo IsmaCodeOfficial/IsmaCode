@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <title>IsmaCode IC</title>
+  <link rel="stylesheet" href="styles.css">
+
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-JH5CGPBKSX"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-JH5CGPBKSX');
+  </script>
+</head>
+<body>
+
+  <!-- ── MÓVIL: nav inferior + 3 pantallas deslizables ── -->
+  <div class="mobile-app">
+
+    <!-- Cabecera móvil -->
+    <header class="mob-header">
+      <img src="assets/ismacode-logo.png" class="mob-logo" alt="IC">
+      <span class="mob-title">IsmaCode</span>
+      <span id="mob-status" class="mob-status">Listo</span>
+    </header>
+
+    <!-- Contenedor deslizable -->
+    <div class="mob-slides" id="mobSlides">
+
+      <!-- Pantalla 0: Ejemplos -->
+      <div class="mob-slide" id="slide-ejemplos">
+        <div class="mob-slide-inner">
+          <div class="identity-card" style="margin-bottom:16px">
+            <strong>IC#</strong>
+            <span>Sin miedo a programar: escribe casi como hablas.</span>
+          </div>
+          <h3 class="mob-section-title">Ejemplos listos</h3>
+          <div class="example-list" id="examples-mobile"></div>
+          <h3 class="mob-section-title" style="margin-top:20px">Funciones útiles</h3>
+          <ul class="quick-list">
+            <li><b>largo(x)</b> cuenta letras o elementos</li>
+            <li><b>azar(a, b)</b> número aleatorio entero</li>
+            <li><b>rango(a, b)</b> crea una lista de números</li>
+            <li><b>elegir(lista)</b> elige un elemento al azar</li>
+            <li><b>ordenar(lista)</b> ordena sin tocar la original</li>
+            <li><b>promedio(lista)</b> calcula la media</li>
+            <li><b>contiene(a, b)</b> comprueba si algo está dentro</li>
+            <li><b>reemplazar(t, a, b)</b> cambia texto</li>
+            <li><b>pantalla(640, 360)</b> prepara el lienzo</li>
+            <li><b>rectangulo(x, y, a, h)</b> pinta formas</li>
+            <li><b>choca(...)</b> detecta colisiones</li>
+            <li><b>limitar(x, min, max)</b> controla movimiento</li>
+            <li><b>tecla("derecha")</b> lee el teclado</li>
+            <li><b>joystick(tam)</b> pad táctil → .dx .dy .arriba...</li>
+            <li><b>saltar(tam)</b> botón acción del pad</li>
+            <li><b>fotograma(60)</b> anima a 60 FPS</li>
+          </ul>
+          <h3 class="mob-section-title" style="margin-top:20px">Reglas simples</h3>
+          <ul class="quick-list">
+            <li>Los bloques terminan con <b>fin</b>.</li>
+            <li><b>:</b> y <b>dos puntos</b> abren bloques.</li>
+            <li><b>,hola,</b> también es texto.</li>
+            <li>Variables como <b>año</b> y <b>niño</b> funcionan.</li>
+            <li>Las listas usan corchetes: <b>["pan", "agua"]</b>.</li>
+            <li>Los textos van entre comillas.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Pantalla 1: Editor principal -->
+      <div class="mob-slide" id="slide-editor">
+        <div class="mob-toolbar">
+          <button id="runButton" class="primary" type="button">▶ Ejecutar</button>
+          <button id="clearButton" type="button">Limpiar</button>
+          <button id="copyButton" type="button">Copiar</button>
+          <button id="openButton" type="button">Abrir</button>
+          <button id="saveButton" type="button">Guardar</button>
+          <input id="fileInput" type="file" accept=".ic,text/plain" hidden>
+        </div>
+        <div class="mob-output">
+          <span id="status" class="mob-out-status">Listo</span>
+          <pre id="output"></pre>
+        </div>
+        <div class="mob-editor-wrap">
+          <div class="gutter" id="gutter"></div>
+          <textarea id="code" spellcheck="false" aria-label="Codigo IsmaCode"></textarea>
+        </div>
+        <div class="mob-canvas-wrap">
+          <canvas id="stage" width="640" height="360" tabindex="0"></canvas>
+          <div id="touch-pad" class="touch-pad">
+            <div class="touch-dpad">
+              <button class="touch-btn touch-up"    data-key="arriba">▲</button>
+              <button class="touch-btn touch-left"  data-key="izquierda">◀</button>
+              <button class="touch-btn touch-right" data-key="derecha">▶</button>
+              <button class="touch-btn touch-down"  data-key="abajo">▼</button>
+            </div>
+            <button class="touch-btn touch-action" data-key="accion">●</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Nav inferior -->
+    <nav class="mob-nav">
+      <button class="mob-nav-btn" data-slide="0" type="button">
+        <span>&#9776;</span><small>Ejemplos</small>
+      </button>
+      <button class="mob-nav-btn active" data-slide="1" type="button">
+        <span>&#9998;</span><small>Editor</small>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ── ESCRITORIO: layout original ── -->
+  <main class="shell desktop-only">
+    <section class="workspace">
+      <aside class="sidebar" aria-label="Panel de IsmaCode">
+        <div class="brand">
+          <img class="logo" src="assets/ismacode-logo.png" alt="Logo de IsmaCode">
+          <div>
+            <h1>IsmaCode</h1>
+            <p>IC convierte ideas en codigo facil.</p>
+          </div>
+        </div>
+        <div class="identity-card">
+          <strong>IC#</strong>
+          <span>Sin miedo a programar: escribe casi como hablas.</span>
+        </div>
+        <div class="panel">
+          <h2>Ejemplos listos</h2>
+          <div class="example-list" id="examples"></div>
+        </div>
+        <div class="panel compact">
+          <h2>Lo importante</h2>
+          <p>Da igual si escribes en mayusculas o minusculas. Muchos comandos tienen sinonimos. Los errores te dicen la linea y una pista.</p>
+        </div>
+      </aside>
+
+      <section class="studio">
+        <header class="toolbar">
+          <div>
+            <span class="eyebrow">Lenguaje IC</span>
+            <h2>Editor</h2>
+          </div>
+          <div class="actions">
+            <button id="runButtonD" class="primary" type="button">Ejecutar</button>
+            <button id="clearButtonD" type="button">Limpiar</button>
+            <button id="copyButtonD" type="button">Copiar</button>
+            <button id="openButtonD" type="button">Abrir .ic</button>
+            <button id="saveButtonD" type="button">Guardar .ic</button>
+            <input id="fileInputD" type="file" accept=".ic,text/plain" hidden>
+          </div>
+        </header>
+        <section class="output-area">
+          <div class="output-head">
+            <h2>Salida</h2>
+            <span id="statusD">Listo</span>
+          </div>
+          <pre id="outputD"></pre>
+        </section>
+        <div class="work-split">
+          <div class="editor-wrap">
+            <div class="gutter" id="gutterD"></div>
+            <textarea id="codeD" spellcheck="false" aria-label="Codigo IsmaCode"></textarea>
+          </div>
+          <section class="stage-wrap" aria-label="Pantalla visual">
+            <div class="stage-head">
+              <h2>Pantalla de juego</h2>
+              <span>Teclado, colisiones y dibujo</span>
+            </div>
+            <canvas id="stageD" width="640" height="360" tabindex="0"></canvas>
+          </section>
+        </div>
+      </section>
+
+      <aside class="reference" aria-label="Referencia rapida">
+        <div class="panel">
+          <h2>Comandos estrella</h2>
+          <div class="chips">
+            <span>mostrar</span><span>guardar</span><span>si</span><span>repetir</span><span>tecla</span><span>joystick</span><span>saltar</span><span>fotograma</span><span>choca</span><span>sprite</span><span>barra</span><span>camara</span><span>pantalla</span>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>Funciones utiles</h2>
+          <ul class="quick-list">
+            <li><b>largo(x)</b> cuenta letras o elementos</li>
+            <li><b>azar(a, b)</b> numero aleatorio entero</li>
+            <li><b>rango(a, b)</b> crea una lista de numeros</li>
+            <li><b>elegir(lista)</b> elige un elemento</li>
+            <li><b>ordenar(lista)</b> ordena sin tocar la original</li>
+            <li><b>promedio(lista)</b> calcula la media</li>
+            <li><b>contiene(a, b)</b> comprueba si algo esta dentro</li>
+            <li><b>reemplazar(t, a, b)</b> cambia texto</li>
+            <li><b>pantalla(640, 360)</b> prepara el lienzo</li>
+            <li><b>rectangulo(x, y, a, h)</b> pinta formas</li>
+            <li><b>choca(...)</b> detecta colisiones</li>
+            <li><b>limitar(x, min, max)</b> controla movimiento</li>
+            <li><b>tecla("derecha")</b> lee el teclado</li>
+            <li><b>joystick(tam)</b> pad táctil móvil</li>
+            <li><b>saltar(tam)</b> botón acción</li>
+            <li><b>fotograma(60)</b> anima a 60 FPS</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h2>Reglas simples</h2>
+          <ul class="quick-list">
+            <li>Los bloques terminan con <b>fin</b>.</li>
+            <li><b>:</b> y <b>dos puntos</b> abren bloques.</li>
+            <li><b>,hola,</b> tambien es texto.</li>
+            <li>Variables como <b>año</b> y <b>niño</b> funcionan.</li>
+            <li>Las listas usan corchetes: <b>["pan", "agua"]</b>.</li>
+            <li>Los textos van entre comillas.</li>
+            <li>Las notas se escriben con <b>nota</b>.</li>
+          </ul>
+        </div>
+      </aside>
+    </section>
+  </main>
+
+  <script src="ismacode-core.js"></script>
+  <script src="app.js"></script>
+  <script src="cordova.js"></script>
+</body>
+</html>
